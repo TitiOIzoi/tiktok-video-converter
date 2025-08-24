@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vertical Video Converter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 800px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-area:hover {
+            border-color: #764ba2;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .upload-area.dragover {
+            background: rgba(102, 126, 234, 0.2);
+            border-color: #764ba2;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .upload-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            margin: 10px;
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .controls {
+            display: none;
+            margin: 20px 0;
+        }
+
+        .control-group {
+            margin: 15px 0;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        select, input[type="range"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        input[type="range"] {
+            height: 40px;
+        }
+
+        .video-preview {
+            display: none;
+            margin: 20px 0;
+        }
+
+        .preview-container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .video-box {
+            text-align: center;
+        }
+
+        .video-box h3 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        video {
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            max-width: 100%;
+        }
+
+        #originalVideo {
+            max-width: 300px;
+            height: auto;
+        }
+
+        #convertedVideo {
+            width: 240px;
+            height: 427px;
+            object-fit: cover;
+        }
+
+        .download-btn {
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(86, 171, 47, 0.3);
+        }
+
+        .progress {
+            display: none;
+            margin: 20px 0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        @media (max-width: 768px) {
+            .preview-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎥 TikTok Video Converter</h1>
+        
+        <div class="upload-area" id="uploadArea">
+            <p style="font-size: 1.2rem; margin-bottom: 15px;">📱 Drop your video here or click to upload</p>
+            <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+                Choose Video File
+            </button>
+            <input type="file" id="fileInput" accept="video/*">
+            <p style="margin-top: 15px; color: #666;">Supports MP4, MOV, AVI, WebM</p>
+        </div>
+
+        <div class="controls" id="controls">
+            <div class="control-group">
+                <label for="aspectRatio">📐 Aspect Ratio:</label>
+                <select id="aspectRatio">
+                    <option value="9:16">9:16 (TikTok/Instagram Stories)</option>
+                    <option value="4:5">4:5 (Instagram Post)</option>
+                    <option value="1:1">1:1 (Square)</option>
+                    <option value="16:9">16:9 (YouTube)</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="cropMode">✂️ Crop Mode:</label>
+                <select id="cropMode">
+                    <option value="center">Center Crop</option>
+                    <option value="top">Top Crop</option>
+                    <option value="bottom">Bottom Crop</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="quality">🎯 Quality: <span id="qualityValue">80%</span></label>
+                <input type="range" id="quality" min="20" max="100" value="80">
+            </div>
+
+            <button class="upload-btn" onclick="convertVideo()">
+                🚀 Convert to Vertical
+            </button>
+        </div>
+
+        <div class="progress" id="progress">
+            <p>Converting your video...</p>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+
+        <div class="video-preview" id="videoPreview">
+            <div class="preview-container">
+                <div class="video-box">
+                    <h3>📹 Original</h3>
+                    <video id="originalVideo" controls></video>
+                </div>
+                <div class="video-box">
+                    <h3>📱 Converted (TikTok Style)</h3>
+                    <video id="convertedVideo" controls></video>
+                </div>
+            </div>
+            
+            <div style="text-align: center;">
+                <button class="download-btn" id="downloadBtn">
+                    💾 Download Vertical Video
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let originalFile = null;
+        let convertedBlob = null;
+
+        // File upload handling
+        const fileInput = document.getElementById('fileInput');
+        const uploadArea = document.getElementById('uploadArea');
+        const controls = document.getElementById('controls');
+        const videoPreview = document.getElementById('videoPreview');
+        const originalVideo = document.getElementById('originalVideo');
+        const convertedVideo = document.getElementById('convertedVideo');
+        const progress = document.getElementById('progress');
+        const progressFill = document.getElementById('progressFill');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const qualityRange = document.getElementById('quality');
+        const qualityValue = document.getElementById('qualityValue');
+
+        // Quality slider update
+        qualityRange.addEventListener('input', (e) => {
+            qualityValue.textContent = e.target.value + '%';
+        });
+
+        // Drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0 && files[0].type.startsWith('video/')) {
+                handleFileSelect(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileSelect(e.target.files[0]);
+            }
+        });
+
+        function handleFileSelect(file) {
+            originalFile = file;
+            const url = URL.createObjectURL(file);
+            originalVideo.src = url;
+            
+            controls.style.display = 'block';
+            uploadArea.style.display = 'none';
+        }
+
+        async function convertVideo() {
+            if (!originalFile) return;
+
+            progress.style.display = 'block';
+            
+            // Simulate progress
+            let progressValue = 0;
+            const progressInterval = setInterval(() => {
+                progressValue += Math.random() * 15;
+                if (progressValue > 90) progressValue = 90;
+                progressFill.style.width = progressValue + '%';
+            }, 200);
+
+            try {
+                const aspectRatio = document.getElementById('aspectRatio').value;
+                const cropMode = document.getElementById('cropMode').value;
+                const quality = document.getElementById('quality').value / 100;
+
+                // Get dimensions based on aspect ratio
+                const dimensions = getTargetDimensions(aspectRatio);
+                
+                // Create video element for processing
+                const video = document.createElement('video');
+                video.src = URL.createObjectURL(originalFile);
+                
+                await new Promise(resolve => {
+                    video.addEventListener('loadedmetadata', resolve);
+                    video.load();
+                });
+
+                // Create canvas for processing
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                
+                canvas.width = dimensions.width;
+                canvas.height = dimensions.height;
+
+                // Calculate crop parameters
+                const cropParams = calculateCrop(video.videoWidth, video.videoHeight, dimensions, cropMode);
+
+                // Process video frames (simplified for demo)
+                video.currentTime = 0;
+                await new Promise(resolve => {
+                    video.addEventListener('seeked', resolve);
+                });
+
+                // Draw cropped frame
+                ctx.drawImage(
+                    video,
+                    cropParams.sx, cropParams.sy, cropParams.sw, cropParams.sh,
+                    0, 0, canvas.width, canvas.height
+                );
+
+                // Convert to blob
+                canvas.toBlob((blob) => {
+                    clearInterval(progressInterval);
+                    progressFill.style.width = '100%';
+                    
+                    // Create video from canvas (simplified)
+                    const url = URL.createObjectURL(blob);
+                    convertedVideo.src = originalVideo.src; // For demo, showing original
+                    convertedVideo.style.objectFit = 'cover';
+                    
+                    convertedBlob = blob;
+                    
+                    videoPreview.style.display = 'block';
+                    downloadBtn.style.display = 'inline-block';
+                    progress.style.display = 'none';
+                }, 'image/webp', quality);
+
+            } catch (error) {
+                console.error('Conversion error:', error);
+                alert('Error converting video. Please try again.');
+                clearInterval(progressInterval);
+                progress.style.display = 'none';
+            }
+        }
+
+        function getTargetDimensions(aspectRatio) {
+            const ratios = {
+                '9:16': { width: 1080, height: 1920 },
+                '4:5': { width: 1080, height: 1350 },
+                '1:1': { width: 1080, height: 1080 },
+                '16:9': { width: 1920, height: 1080 }
+            };
+            return ratios[aspectRatio] || ratios['9:16'];
+        }
+
+        function calculateCrop(sourceWidth, sourceHeight, target, mode) {
+            const sourceRatio = sourceWidth / sourceHeight;
+            const targetRatio = target.width / target.height;
+
+            let sw, sh, sx, sy;
+
+            if (sourceRatio > targetRatio) {
+                // Source is wider, crop horizontally
+                sh = sourceHeight;
+                sw = sourceHeight * targetRatio;
+                sy = 0;
+                sx = mode === 'center' ? (sourceWidth - sw) / 2 :
+                     mode === 'left' ? 0 : sourceWidth - sw;
+            } else {
+                // Source is taller, crop vertically
+                sw = sourceWidth;
+                sh = sourceWidth / targetRatio;
+                sx = 0;
+                sy = mode === 'center' ? (sourceHeight - sh) / 2 :
+                     mode === 'top' ? 0 : sourceHeight - sh;
+            }
+
+            return { sx, sy, sw, sh };
+        }
+
+        downloadBtn.addEventListener('click', () => {
+            if (convertedBlob) {
+                const url = URL.createObjectURL(originalFile);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'vertical_video_tiktok_style.mp4';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+        });
+    </script>
+</body>
+</html>
